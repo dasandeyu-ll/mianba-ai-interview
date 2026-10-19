@@ -5,10 +5,12 @@ import { ConfigPage, InterviewPage, ReportPage } from './pages';
 import { api } from './api';
 
 function App() {
-  const [step, setStep] = useState('config');
+  // 支持 ?report=<session_id> 直达报告页,方便把报告链接直接分享/截图
+  const urlReport = new URLSearchParams(location.search).get('report') || '';
+  const [step, setStep] = useState(urlReport ? 'report' : 'config');
   const [session, setSession] = useState(null);
   const [startIndex, setStartIndex] = useState(0);
-  const [sid, setSid] = useState(localStorage.getItem('mianba_session') || '');
+  const [sid, setSid] = useState(urlReport || localStorage.getItem('mianba_session') || '');
   const [resumeInfo, setResumeInfo] = useState(null);
 
   // 有旧 session_id 就查一下状态,支持断点续面(刷新页面不丢进度)
@@ -41,5 +43,10 @@ function App() {
       {step === 'report' && <ReportPage sessionId={sid} />}
     </div>
   );
+}
+// 语音播报默认关闭;演示时在浏览器控制台执行 __speech_on() 开启、__speech_off() 关闭
+if (typeof window !== 'undefined') {
+  window.__speech_on = () => api.setSpeech(true);
+  window.__speech_off = () => api.setSpeech(false);
 }
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);

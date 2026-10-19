@@ -1,3 +1,6 @@
+// 语音播报开关:默认关,演示时可在控制台 __speech_on() 打开
+let SPEECH_ENABLED = false;
+
 async function postJSON(url, body) {
   const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const data = await r.json().catch(() => ({}));
@@ -30,7 +33,10 @@ export const api = {
     return r.json();
   },
   speak(text) {
-    // Web Speech 免费离线可用;对比接云厂商 TTS:零成本零延迟,演示最稳
+    // Web Speech 免费离线可用;默认静音(面试现场开麦会吵/会被录到),
+    // 需要演示语音时把 SPEECH_ENABLED 改成 true 或在控制台执行 __speech_on()
+    if (!SPEECH_ENABLED) return;
     try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = 1.05; speechSynthesis.speak(u); } catch {}
   },
+  setSpeech(on) { SPEECH_ENABLED = on; if (!on) { try { speechSynthesis.cancel(); } catch {} } },
 };
